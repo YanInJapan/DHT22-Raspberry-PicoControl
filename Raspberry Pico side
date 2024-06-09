@@ -1,0 +1,21 @@
+##################################################################
+# Name this file as 'main.py' and save to your pico              #
+# PicoDHT22 is provided as link below                            #
+# GP16 for data / 3V3 OUT for +                                  #
+# https://github.com/danjperron/PicoDHT22/blob/main/PicoDHT22.py #
+##################################################################
+from machine import Pin
+from PicoDHT22 import PicoDHT22
+import time
+
+
+dht22 = PicoDHT22(Pin(16,Pin.IN,Pin.PULL_UP))
+
+while True:
+    T, H = dht22.read()
+    
+    if T is None:
+        pass
+    else:
+        print("{:3.1f} {:3.1f}".format(T,H))
+    time.sleep_ms(1000)
