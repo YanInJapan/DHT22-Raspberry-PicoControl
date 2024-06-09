@@ -1,7 +1,7 @@
 ##################################################################
 # Name this file as 'main.py' and save to your pico              #
-# PicoDHT22 is provided as link below                            #
 # GP16 for data / 3V3 OUT for +                                  #
+# PicoDHT22 is provided as link below:                           #
 # https://github.com/danjperron/PicoDHT22/blob/main/PicoDHT22.py #
 ##################################################################
 from machine import Pin
