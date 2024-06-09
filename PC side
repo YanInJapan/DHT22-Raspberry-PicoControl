@@ -1,0 +1,206 @@
+# This is for people who want to save DHT22 logging data to excel file and save to PC
+# Connect Raspberry pico and run this code on PC
+# Before running, copy the code below to Raspberry pico and save as "main.py"
+# https://github.com/YanInJapan/DHT22-PicoControl/blob/main/Raspberry%20Pico%20side
+
+
+import serial
+from datetime import datetime
+import time
+import matplotlib.pyplot as plt
+import pandas as pd
+import tkinter as tk
+import keyboard as kb
+from tkinter import messagebox
+
+
+baseGround = tk.Tk()
+baseGround.geometry('400x210')
+baseGround.title('Temperature Humidity Logger')
+label1 = tk.Label(text='File saving route (EX: C:\\Users\hushi\OneDrive\桌面)')
+label1.place(x=30, y=30)
+textBox1 = tk.Entry(width=50)
+textBox1.place(x=30, y=50)
+
+OptionList = ["Temperature", "Humidity"]
+variable = tk.StringVar(baseGround)
+variable.set(OptionList[0])
+opt = tk.OptionMenu(baseGround, variable, *OptionList)
+opt.config(width=10, font=("Helvetica", 9))
+opt.pack(side="top")
+
+
+
+label2 = tk.Label(text='Port (EX: COM1)')
+label2.place(x=30, y=70)
+textBox2 = tk.Entry(width=30)
+textBox2.place(x=30, y=90)
+
+
+label4 = tk.Label(text='Keep pressing Esc to finish logger')
+label4.place(x=30, y=180)
+
+
+MeasureTimeInterval=1 #unit= seconds
+
+Ntime=[]     
+Timex=[]
+Tempy=[]
+humiy=[]
+WaitTime=0
+
+Status='on'
+
+def finish():
+    global Ntime   
+    global Timex
+    global Tempy
+    global humiy
+    save_route=textBox1.get()
+    savingtime=time.time()
+        
+    array=[Ntime,
+           Timex,
+           Tempy,
+           humiy]
+    df=pd.DataFrame(array).T
+    df.to_excel(excel_writer=save_route+'THlog'+str(savingtime)+'.xlsx')
+    Ntime=[]     
+    Timex=[]
+    Tempy=[]
+    humiy=[]
+    
+    messagebox.askquestion("Info", "Logging finished")
+    
+
+        
+
+def main():
+    
+    global WaitTime
+    global Timex
+    global Tempy
+    global humiy
+    global t
+    global Ntime
+    global StartTime
+    global MeasureTimeInterval
+    global Status
+    
+    
+    Status='on'
+    baudrate = 115200
+    port=textBox2.get()
+    serial_connection = serial.Serial(port, baudrate)
+    StartTime = datetime.now()
+    StartTime = StartTime.strftime('%D:%H:%M:%S')
+    Start_time=StartTime.split(":")
+    sdate=Start_time[0]
+    sDate=sdate.split("/")
+    sDATE=int(sDate[1])
+    sh=int(Start_time[1])
+    sm=int(Start_time[2])
+    ss=int(Start_time[3])
+    
+           
+    
+    while True:
+        
+        if WaitTime==0:
+            
+            Now=datetime.now()
+            Nowtime=Now.strftime('%D:%H:%M:%S')
+            now_time=Nowtime.split(":")
+            date=now_time[0]
+            nDate=date.split("/")
+            nDATE=int(nDate[1])
+            nh=int(now_time[1])
+            nm=int(now_time[2])
+            ns=int(now_time[3])
+            PassTime=(nDATE-sDATE)*24+(nh-sh)+(nm-sm)/60+(ns-ss)/3600
+            Type=variable.get()
+        
+    
+            data = serial_connection.read(11)
+            if data == b"EOF":
+                break
+            Now=datetime.now()
+            Nowtime=Now.strftime('%D:%H:%M:%S')
+            now_time=Nowtime.split(":")
+            date=now_time[0]
+            nDate=date.split("/")
+            nDATE=int(nDate[1])
+            nh=int(now_time[1])
+            nm=int(now_time[2])
+            ns=int(now_time[3])
+            PassTime=(nDATE-sDATE)*24+(nh-sh)+(nm-sm)/60+(ns-ss)/3600
+        
+            data=str(data)
+            print(Nowtime+data)
+            data1=data.split(" ")
+            T1=''
+            for a in data1[0]:
+                if a.isdigit() or a=='.':
+                    T1=T1+str(a)
+                else:
+                    pass
+            H1=''
+            for a in data1[1]:
+                if a.isdigit() or a=='.':
+                    H1=H1+str(a)
+                else:
+                    pass
+            temperature=float(T1)
+            humidity=float(H1)
+        
+            Ntime.append(Nowtime)
+            humiy.append(humidity)
+            Timex.append(PassTime)
+            Tempy.append(temperature)
+            WaitTime=MeasureTimeInterval
+        
+            if Type== "Temperature":
+            
+                plt.xlabel("Time(hr)")
+                plt.ylabel("Temperature(C)")
+                plt.title("Temperature trend")
+                plt.plot(Timex, Tempy, color = "green")
+                plt.pause(0.01)
+                
+                if Status=='off':
+                    res = messagebox.askquestion("Info", "Logging finished")
+                    print("askquestion", res)
+                    break
+                else:
+                    pass
+            
+            if Type== "Humidity":
+            
+                plt.xlabel("Time(hr)")
+                plt.ylabel("Humidity(%)")
+                plt.title("Temperature trend")
+                plt.plot(Timex, humiy, color = "green")
+                plt.pause(0.01)
+            
+                if Status=='off':
+                    res = messagebox.askquestion("Info", "Logging finished")
+                    break
+                else:
+                    pass
+  
+
+        else:     
+            WaitTime-=1
+            time.sleep(1)
+            if kb.is_pressed('Esc'):
+                Status='off'
+                finish()
+                break
+  
+btn1 = tk.Button(baseGround, text = 'Start',
+                command=main).place(x=30, y=150)
+        
+
+
+
+baseGround.mainloop()
