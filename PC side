@@ -17,7 +17,7 @@ from tkinter import messagebox
 baseGround = tk.Tk()
 baseGround.geometry('400x210')
 baseGround.title('Temperature Humidity Logger')
-label1 = tk.Label(text='File saving route (EX: C:\\Users\hushi\OneDrive\桌面)')
+label1 = tk.Label(text='File saving route (EX: C:\\Users\hushi\OneDrive\Desktop)')
 label1.place(x=30, y=30)
 textBox1 = tk.Entry(width=50)
 textBox1.place(x=30, y=50)
