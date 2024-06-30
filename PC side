@@ -64,7 +64,7 @@ def finish():
            Tempy,
            humiy]
     df=pd.DataFrame(array).T
-    df.to_excel(excel_writer=save_route+'THlog'+str(savingtime)+'.xlsx')
+    df.to_excel(excel_writer=save_route+'\THlog'+str(savingtime)+'.xlsx')
     Ntime=[]     
     Timex=[]
     Tempy=[]
